@@ -1,0 +1,1299 @@
+<title>MSA Pakistan Staff Portal</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ── */
+:root {
+  --navy:    #0c2340;
+  --navy2:   #152f52;
+  --navy3:   #1e3d66;
+  --teal:    #0a7c6e;
+  --teal2:   #0d9484;
+  --teal-lt: #d6f5f1;
+  --sky:     #1a7ec8;
+  --sky-lt:  #e6f2fb;
+  --bg:      #f1f5fa;
+  --surface: #ffffff;
+  --surf2:   #f8fafc;
+  --border:  #dde6ef;
+  --border2: #c8d6e4;
+  --text:    #0f1e2d;
+  --text2:   #3c5168;
+  --text3:   #7892a8;
+  --ok:      #0a6b47; --ok-bg: #e5f7ef;
+  --warn:    #8c5200; --warn-bg: #fff8ea;
+  --err:     #a82020; --err-bg: #fff0f0;
+  --info:    #165f99; --info-bg: #e8f1fb;
+  --shadow:  0 1px 3px rgba(12,35,64,.07), 0 4px 14px rgba(12,35,64,.05);
+  --radius:  10px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --navy:    #0a1e35; --navy2: #0f2a47; --navy3: #163459;
+    --bg:      #101c2c; --surface: #152235; --surf2: #1a2d44;
+    --border:  #223348; --border2: #2d4360;
+    --text:    #cfe4f7; --text2: #89adc8; --text3: #4d6f8c;
+    --ok-bg: #0a2d20; --warn-bg: #2a1f00; --err-bg: #2d0a0a; --info-bg: #0d1f33;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --navy:    #0a1e35; --navy2: #0f2a47; --navy3: #163459;
+  --bg:      #101c2c; --surface: #152235; --surf2: #1a2d44;
+  --border:  #223348; --border2: #2d4360;
+  --text:    #cfe4f7; --text2: #89adc8; --text3: #4d6f8c;
+  --ok-bg: #0a2d20; --warn-bg: #2a1f00; --err-bg: #2d0a0a; --info-bg: #0d1f33;
+  color-scheme: dark;
+}
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg); color: var(--text);
+  font-size: 14px; line-height: 1.6;
+  min-height: 100%; overflow-x: hidden;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  background: var(--navy); color: #fff;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 max(20px, env(safe-area-inset-left,0px));
+  height: 54px; position: sticky; top: 0; z-index: 200;
+  border-bottom: 2px solid var(--teal2);
+}
+.topbar-brand { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.topbar-brand .pip { width: 7px; height: 7px; border-radius: 50%; background: var(--teal2); }
+.topbar-right { display: flex; align-items: center; gap: 14px; font-size: 12px; }
+.topbar-user { color: #a8c8e4; font-weight: 500; }
+#btn-logout { background: none; border: 1px solid #2d4f72; color: #90b8d6; border-radius: 7px; padding: 5px 12px; font-size: 12px; cursor: pointer; font-family: inherit; }
+#btn-logout:hover { border-color: var(--teal2); color: #d1ecf1; }
+#topbar-role { background: var(--teal); color: #fff; border-radius: 100px; padding: 2px 10px; font-size: 10px; font-weight: 700; letter-spacing: .5px; }
+
+/* ── LAYOUT ── */
+.app { display: flex; min-height: calc(100vh - 54px); }
+.sidebar {
+  width: 210px; min-width: 210px; background: var(--navy2);
+  display: flex; flex-direction: column; padding: 10px 0;
+  flex-shrink: 0;
+}
+.sidebar-label { font-size: 10px; font-weight: 600; color: #3d6080; letter-spacing: .9px; text-transform: uppercase; padding: 14px 16px 5px; }
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 16px; color: #7ba8c8; font-size: 13px; font-weight: 500;
+  cursor: pointer; border-left: 3px solid transparent; transition: all .14s;
+  border: none; background: none; width: 100%; text-align: left; font-family: inherit;
+}
+.nav-item:hover { background: rgba(255,255,255,.05); color: #cde6f8; }
+.nav-item.active { background: rgba(255,255,255,.08); color: #fff; border-left-color: var(--teal2); }
+.nav-icon { font-size: 15px; width: 18px; text-align: center; }
+.main { flex: 1; min-width: 0; padding: 28px max(20px, env(safe-area-inset-right,0px)) 50px 28px; }
+
+/* ── CARDS / PAGE CHROME ── */
+.page { display: none; }
+.page.active { display: block; }
+.page-title { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .page-title { color: var(--text); } }
+:root[data-theme="dark"] .page-title { color: var(--text); }
+.page-sub { color: var(--text3); font-size: 13px; margin-bottom: 20px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-bottom: 16px; }
+.card-title { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; margin-bottom: 14px; }
+.row { display: flex; gap: 14px; flex-wrap: wrap; }
+.col { flex: 1; min-width: 260px; }
+
+/* ── STAT TILES ── */
+.stat-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; flex: 1; min-width: 130px; box-shadow: var(--shadow); }
+.stat-val { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; color: var(--teal); font-variant-numeric: tabular-nums; }
+.stat-label { font-size: 11px; color: var(--text3); margin-top: 2px; font-weight: 500; text-transform: uppercase; letter-spacing: .4px; }
+
+/* ── FORM ELEMENTS ── */
+label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 5px; color: var(--text2); }
+input[type=text], input[type=email], input[type=password], input[type=number], select, textarea {
+  width: 100%; padding: 10px 12px;
+  border: 1px solid var(--border2); border-radius: 8px;
+  background: var(--surf2); color: var(--text);
+  font-family: inherit; font-size: 14px;
+  transition: border-color .15s;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--teal2); box-shadow: 0 0 0 3px rgba(10,120,110,.12); }
+textarea { min-height: 80px; resize: vertical; }
+.form-group { margin-bottom: 14px; }
+.form-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.form-row .form-group { flex: 1; min-width: 180px; }
+
+/* ── BUTTONS ── */
+.btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; }
+.btn-primary { background: var(--teal); color: #fff; }
+.btn-primary:hover { background: var(--teal2); }
+.btn-secondary { background: var(--surf2); color: var(--text2); border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: var(--border2); background: var(--border); }
+.btn-danger { background: #c0392b; color: #fff; }
+.btn-danger:hover { background: #a93226; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── BADGES / PILLS ── */
+.badge { display: inline-block; border-radius: 100px; padding: 2px 10px; font-size: 11px; font-weight: 700; }
+.badge-ok { background: var(--ok-bg); color: var(--ok); }
+.badge-warn { background: var(--warn-bg); color: var(--warn); }
+.badge-err { background: var(--err-bg); color: var(--err); }
+.badge-info { background: var(--info-bg); color: var(--info); }
+.badge-neutral { background: var(--surf2); color: var(--text2); border: 1px solid var(--border); }
+
+/* ── ALERTS ── */
+.alert { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; border-left: 4px solid; }
+.alert-ok  { background: var(--ok-bg);   color: var(--ok);   border-color: var(--ok); }
+.alert-err { background: var(--err-bg);  color: var(--err);  border-color: var(--err); }
+.alert-warn{ background: var(--warn-bg); color: var(--warn); border-color: var(--warn); }
+.alert-info{ background: var(--info-bg); color: var(--info); border-color: var(--sky); }
+
+/* ── TABLE ── */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; padding: 9px 12px; font-size: 11px; font-weight: 600; color: var(--text3); border-bottom: 2px solid var(--border); text-transform: uppercase; letter-spacing: .4px; white-space: nowrap; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surf2); }
+
+/* ── MODAL ── */
+.modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 500; align-items: center; justify-content: center; padding: 20px; }
+.modal-backdrop.open { display: flex; }
+.modal { background: var(--surface); border-radius: 14px; width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+.modal-head { padding: 18px 22px 0; display: flex; align-items: center; justify-content: space-between; }
+.modal-head h3 { font-family: 'Space Grotesk', sans-serif; font-size: 17px; }
+.modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text3); line-height: 1; padding: 4px 8px; }
+.modal-body { padding: 16px 22px 22px; }
+
+/* ── TOAST ── */
+#toast-area { position: fixed; bottom: 24px; right: 24px; z-index: 999; display: flex; flex-direction: column; gap: 10px; }
+.toast { padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; box-shadow: 0 4px 20px rgba(0,0,0,.18); animation: slideIn .25s ease; max-width: 340px; }
+.toast-ok  { background: var(--ok);   color: #fff; }
+.toast-err { background: var(--err);  color: #fff; }
+.toast-info{ background: var(--navy); color: #cfe4f7; }
+@keyframes slideIn { from { transform: translateX(60px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* ── LOGIN SCREEN ── */
+#login-screen {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 60%, #0a4a4a 100%);
+  padding: max(20px, env(safe-area-inset-left,0px));
+}
+.login-box { background: var(--surface); border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,.35); padding: 36px 32px; width: 100%; max-width: 420px; }
+.login-logo { text-align: center; margin-bottom: 24px; }
+.login-logo .brand { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; color: var(--navy); }
+.login-logo .sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
+.tab-row { display: flex; border-bottom: 2px solid var(--border); margin-bottom: 20px; gap: 0; }
+.tab-btn { flex: 1; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; padding: 10px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text3); transition: all .15s; }
+.tab-btn.active { color: var(--teal); border-bottom-color: var(--teal); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── EVALUATOR SCORE ── */
+.criterion-item { border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; background: var(--surf2); }
+.criterion-name { font-weight: 600; font-size: 13px; }
+.criterion-meta { font-size: 11px; color: var(--text3); margin: 2px 0 10px; }
+input[type=range] { width: 100%; accent-color: var(--teal); }
+.score-display { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: var(--teal); text-align: right; }
+
+/* ── PIPELINE TRACK ── */
+.pipeline { display: flex; gap: 0; margin-bottom: 20px; overflow-x: auto; }
+.pip-stage { flex: 1; min-width: 90px; text-align: center; padding: 10px 8px; font-size: 11px; font-weight: 600; color: var(--text3); border-bottom: 3px solid var(--border); }
+.pip-stage.done { color: var(--ok); border-bottom-color: var(--ok); }
+.pip-stage.active { color: var(--teal2); border-bottom-color: var(--teal2); }
+
+/* ── SIGNING QUEUE ── */
+.sign-item { border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; display: flex; align-items: center; gap: 14px; }
+.sign-item-info { flex: 1; min-width: 0; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 700px) {
+  .sidebar { display: none; }
+  .main { padding: 16px max(16px, env(safe-area-inset-right,0px)) 40px 16px; }
+  .stat-row { gap: 10px; }
+  .stat { min-width: 120px; }
+}
+</style>
+
+<!-- ═══════════════════════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="brand">🏥 MSA Pakistan</div>
+      <div class="sub">Staff & Interviewer Portal · Secure Sign-In</div>
+    </div>
+    <div id="login-alert"></div>
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="switchTab('pw')">Password Login</button>
+      <button class="tab-btn" onclick="switchTab('otp')">OTP Login</button>
+    </div>
+
+    <!-- PASSWORD TAB -->
+    <div id="tab-pw" class="tab-panel active">
+      <div class="form-group"><label>Official Email</label><input id="pw-email" type="email" placeholder="you@msapakistan.com.pk" autocomplete="email"></div>
+      <div class="form-group"><label>Password</label><input id="pw-pass" type="password" placeholder="Your password" autocomplete="current-password"></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doLogin()">Sign In</button>
+      <p style="margin-top:14px;font-size:12px;color:var(--text3);text-align:center">No password yet? Use OTP Login to sign in and set one.</p>
+    </div>
+
+    <!-- OTP TAB -->
+    <div id="tab-otp" class="tab-panel">
+      <div id="otp-step1">
+        <div class="form-group"><label>Official Email</label><input id="otp-email" type="email" placeholder="you@msapakistan.com.pk" autocomplete="email"></div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doRequestOTP()">Send Verification Code</button>
+      </div>
+      <div id="otp-step2" style="display:none">
+        <div class="form-group"><label>6-digit Code (sent to your email)</label><input id="otp-code" type="text" maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="123456"></div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doVerifyOTP()">Verify &amp; Continue</button>
+      </div>
+      <div id="otp-step3" style="display:none">
+        <div class="alert alert-info">First time? Set a password so you can log in directly next time.</div>
+        <div class="form-group"><label>New Password (min 10 chars)</label><input id="otp-newpass" type="password" placeholder="Choose a secure password"></div>
+        <div class="form-group"><label>Confirm Password</label><input id="otp-newpass2" type="password" placeholder="Repeat password"></div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doSetPassword()">Set Password &amp; Sign In</button>
+        <button class="btn btn-secondary" style="width:100%;justify-content:center;margin-top:8px" onclick="doSkipPassword()">Skip for now (OTP session only)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     MAIN APP
+══════════════════════════════════════════════════════════ -->
+<div id="app" style="display:none">
+  <div class="topbar">
+    <div class="topbar-brand"><span class="pip"></span>MSA Pakistan</div>
+    <div class="topbar-right">
+      <span id="topbar-role"></span>
+      <span class="topbar-user" id="topbar-email"></span>
+      <button id="btn-logout" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+  <div class="app">
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-label">My Work</div>
+      <button class="nav-item active" data-page="dashboard" onclick="goPage(this)"><span class="nav-icon">📊</span>Dashboard</button>
+      <button class="nav-item" data-page="my-interviews" onclick="goPage(this)"><span class="nav-icon">📝</span>My Interviews</button>
+      <button class="nav-item admin-only" data-page="signing-queue" onclick="goPage(this)"><span class="nav-icon">✍️</span>Signing Queue</button>
+
+      <div class="sidebar-label admin-only">Administration</div>
+      <button class="nav-item admin-only" data-page="vacancies" onclick="goPage(this)"><span class="nav-icon">📋</span>Vacancies</button>
+      <button class="nav-item admin-only" data-page="applications" onclick="goPage(this)"><span class="nav-icon">👥</span>Applications</button>
+      <button class="nav-item admin-only" data-page="interviews-admin" onclick="goPage(this)"><span class="nav-icon">🎯</span>Interviews</button>
+      <button class="nav-item admin-only" data-page="appointments" onclick="goPage(this)"><span class="nav-icon">📄</span>Appointments</button>
+      <button class="nav-item admin-only" data-page="users-admin" onclick="goPage(this)"><span class="nav-icon">👤</span>Users</button>
+
+      <div class="sidebar-label" style="margin-top:auto">Account</div>
+      <button class="nav-item" data-page="settings" onclick="goPage(this)"><span class="nav-icon">⚙️</span>Settings</button>
+    </nav>
+
+    <main class="main" id="main-content">
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-title">Dashboard</div>
+        <div class="page-sub" id="dash-sub">Loading…</div>
+        <div class="stat-row" id="dash-stats"></div>
+        <div class="row">
+          <div class="col">
+            <div class="card">
+              <div class="card-title">My Interview Assignments</div>
+              <div id="dash-assignments">Loading…</div>
+            </div>
+          </div>
+          <div class="col admin-only">
+            <div class="card">
+              <div class="card-title">Recent Admin Actions</div>
+              <div id="dash-admin-info" style="color:var(--text3);font-size:13px">Load the Interviews or Appointments page to see details.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MY INTERVIEWS -->
+      <div class="page" id="page-my-interviews">
+        <div class="page-title">My Interviews</div>
+        <div class="page-sub">Your assigned panels and pending evaluations.</div>
+        <div id="my-interviews-content">Loading…</div>
+      </div>
+
+      <!-- SIGNING QUEUE -->
+      <div class="page" id="page-signing-queue">
+        <div class="page-title">Signing Queue</div>
+        <div class="page-sub">Appointment letters awaiting your authorized signature.</div>
+        <div id="signing-queue-content">Loading…</div>
+      </div>
+
+      <!-- VACANCIES -->
+      <div class="page" id="page-vacancies">
+        <div class="page-title">Vacancies</div>
+        <div class="page-sub">Manage open positions across Local Councils.</div>
+        <div id="vacancies-content">Loading…</div>
+      </div>
+
+      <!-- APPLICATIONS -->
+      <div class="page" id="page-applications">
+        <div class="page-title">Applications</div>
+        <div class="page-sub">Review submitted applications, verify membership, and conduct screenings.</div>
+        <div id="applications-content">Loading…</div>
+      </div>
+
+      <!-- INTERVIEWS ADMIN -->
+      <div class="page" id="page-interviews-admin">
+        <div class="page-title">Interview Management</div>
+        <div class="page-sub">Assign panel members, review scores, and record final decisions.</div>
+        <div id="interviews-admin-content">Loading…</div>
+      </div>
+
+      <!-- APPOINTMENTS -->
+      <div class="page" id="page-appointments">
+        <div class="page-title">Appointments</div>
+        <div class="page-sub">Issue appointment documents, track agreement signing, and activate appointments.</div>
+        <div id="appointments-content">Loading…</div>
+      </div>
+
+      <!-- USERS ADMIN -->
+      <div class="page" id="page-users-admin">
+        <div class="page-title">User Management</div>
+        <div class="page-sub">View enabled staff accounts and their roles.</div>
+        <div id="users-admin-content">Loading…</div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="page" id="page-settings">
+        <div class="page-title">Account Settings</div>
+        <div class="page-sub">Change your password or manage your session.</div>
+        <div class="card" style="max-width:440px">
+          <div class="card-title">Change Password</div>
+          <div id="settings-alert"></div>
+          <div class="form-group"><label>Current Password</label><input id="set-oldpass" type="password" placeholder="Current password"></div>
+          <div class="form-group"><label>New Password (min 10 chars)</label><input id="set-newpass" type="password" placeholder="New password"></div>
+          <div class="form-group"><label>Confirm New Password</label><input id="set-newpass2" type="password" placeholder="Repeat new password"></div>
+          <button class="btn btn-primary" onclick="doChangePassword()">Update Password</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Interview Evaluation Modal -->
+<div class="modal-backdrop" id="modal-eval">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Submit Evaluation</h3>
+      <button class="modal-close" onclick="closeModal('modal-eval')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="eval-candidate-info" style="margin-bottom:16px;font-size:13px;color:var(--text2)"></div>
+      <div id="eval-criteria-list"></div>
+      <div class="form-group" style="margin-top:14px">
+        <label>Recommendation</label>
+        <select id="eval-recommendation">
+          <option value="RECOMMEND">Recommend</option>
+          <option value="CONDITIONAL">Conditional Recommend</option>
+          <option value="NOT_RECOMMEND">Do Not Recommend</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Comments (optional)</label>
+        <textarea id="eval-comments" placeholder="Strengths, areas of concern, general observations…"></textarea>
+      </div>
+      <div id="eval-alert"></div>
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <button class="btn btn-primary" onclick="doSubmitEval()">Submit Evaluation</button>
+        <button class="btn btn-secondary" onclick="closeModal('modal-eval')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Assign Interviewer Modal -->
+<div class="modal-backdrop" id="modal-assign">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Assign Panel Member</h3>
+      <button class="modal-close" onclick="closeModal('modal-assign')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label>Interviewer Email</label><input id="assign-email" type="email" placeholder="interviewer@msapakistan.com.pk"></div>
+      <div class="form-group"><label>Panel Role</label>
+        <select id="assign-role">
+          <option value="INTERVIEWER">INTERVIEWER</option>
+          <option value="PANEL_MEMBER">PANEL_MEMBER</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Due Date (optional)</label><input id="assign-due" type="text" placeholder="2026-01-15"></div>
+      <div id="assign-alert"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-primary" onclick="doAssign()">Assign</button>
+        <button class="btn btn-secondary" onclick="closeModal('modal-assign')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Final Decision Modal -->
+<div class="modal-backdrop" id="modal-decision">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Record Final Decision</h3>
+      <button class="modal-close" onclick="closeModal('modal-decision')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label>Decision</label>
+        <select id="dec-decision">
+          <option value="SELECT">SELECT — Proceed to appointment</option>
+          <option value="REJECT">REJECT — Not selected</option>
+          <option value="WITHHOLD">WITHHOLD — Hold pending review</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Notes</label><textarea id="dec-notes" placeholder="Rationale, conditions, committee notes…"></textarea></div>
+      <div id="dec-alert"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-primary" onclick="doFinalDecision()">Record Decision</button>
+        <button class="btn btn-secondary" onclick="closeModal('modal-decision')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Appointment Detail Modal -->
+<div class="modal-backdrop" id="modal-appt">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-head">
+      <h3>Appointment Details</h3>
+      <button class="modal-close" onclick="closeModal('modal-appt')">×</button>
+    </div>
+    <div class="modal-body" id="modal-appt-body">Loading…</div>
+  </div>
+</div>
+
+<!-- Toast Area -->
+<div id="toast-area"></div>
+
+<script>
+'use strict';
+/* ─── BACKEND ─────────────────────────────────────────── */
+const EXEC_URL = 'https://script.google.com/macros/s/AKfycbxCU1sErW3sDcaudmCeBApHzNjk20tQGU-RvMVxBmQx81lSB9jUyyQU5-hNrRwxr7aw/exec';
+
+async function call(fn, ...args) {
+  const params = new URLSearchParams({ fn, args: JSON.stringify(args) });
+  const url = EXEC_URL + '?' + params.toString();
+  let resp;
+  try {
+    resp = await fetch(url, { mode: 'cors', redirect: 'follow' });
+  } catch (e) {
+    throw new Error('Failed to fetch — ' + e.message);
+  }
+  if (!resp.ok) throw new Error('Server error ' + resp.status);
+  let json;
+  try { json = await resp.json(); } catch { throw new Error('Invalid response from server.'); }
+  if (json && json.__error) throw new Error(json.__error);
+  return json;
+}
+
+/* ─── SESSION ─────────────────────────────────────────── */
+let SESSION = { token: null, email: null, role: null, name: null, canAdmin: false, canSign: false };
+let _otpToken = null; // temp OTP session for password enrollment
+
+function saveSession() {
+  try { localStorage.setItem('msap_sess', JSON.stringify(SESSION)); } catch {}
+}
+function loadSession() {
+  try { const s = localStorage.getItem('msap_sess'); if (s) SESSION = JSON.parse(s); } catch {}
+}
+function clearSession() {
+  SESSION = { token: null, email: null, role: null, name: null, canAdmin: false, canSign: false };
+  try { localStorage.removeItem('msap_sess'); } catch {}
+}
+
+/* ─── TOAST ───────────────────────────────────────────── */
+function toast(msg, type='info') {
+  const el = document.createElement('div');
+  el.className = 'toast toast-' + type;
+  el.textContent = msg;
+  document.getElementById('toast-area').appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+/* ─── ALERT HELPERS ───────────────────────────────────── */
+function setAlert(id, msg, type='err') {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = msg ? `<div class="alert alert-${type}">${escHtml(msg)}</div>` : '';
+}
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function badge(status) {
+  const map = {
+    SELECT:'ok', APPROVE:'ok', APPROVED:'ok', ACTIVE:'ok', ELIGIBLE:'ok', VERIFIED:'ok',
+    REJECT:'err', REJECTED:'err', REJECT_:'err',
+    DEFER:'warn', WAITLIST:'warn', PENDING:'warn', UNDER_REVIEW:'warn', PREPARING:'warn', ISSUANCE_REVIEW:'warn', CORRECTION_REQUIRED:'warn',
+    ISSUED:'info', READY:'info',
+  };
+  const key = String(status).toUpperCase().replace(/ /g,'_');
+  const cls = map[key] || 'neutral';
+  return `<span class="badge badge-${cls}">${escHtml(status)}</span>`;
+}
+
+/* ─── MODAL ───────────────────────────────────────────── */
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-backdrop')) e.target.classList.remove('open');
+});
+
+/* ─── LOGIN: PASSWORD ─────────────────────────────────── */
+async function doLogin() {
+  const email = document.getElementById('pw-email').value.trim();
+  const pass = document.getElementById('pw-pass').value;
+  if (!email || !pass) return setAlert('login-alert', 'Enter email and password.');
+  setAlert('login-alert', '');
+  const btn = event.target; btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    const res = await call('msa13uiLogin', email, pass);
+    if (res && res.token) {
+      await afterLogin(res.token);
+    } else {
+      setAlert('login-alert', 'Sign-in failed. Check credentials.');
+    }
+  } catch (e) {
+    setAlert('login-alert', e.message);
+  } finally { btn.disabled = false; btn.textContent = 'Sign In'; }
+}
+
+/* ─── LOGIN: OTP REQUEST ──────────────────────────────── */
+async function doRequestOTP() {
+  const email = document.getElementById('otp-email').value.trim();
+  if (!email) return setAlert('login-alert', 'Enter your email.');
+  setAlert('login-alert', '');
+  const btn = event.target; btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    const msg = await call('msa13ixRequestCode', email);
+    document.getElementById('otp-step1').style.display = 'none';
+    document.getElementById('otp-step2').style.display = '';
+    setAlert('login-alert', msg || 'Code sent — check your email.', 'info');
+  } catch (e) {
+    setAlert('login-alert', e.message);
+  } finally { btn.disabled = false; btn.textContent = 'Send Verification Code'; }
+}
+
+/* ─── LOGIN: OTP VERIFY ───────────────────────────────── */
+async function doVerifyOTP() {
+  const email = document.getElementById('otp-email').value.trim();
+  const code = document.getElementById('otp-code').value.trim();
+  if (!code) return setAlert('login-alert', 'Enter the 6-digit code.');
+  const btn = event.target; btn.disabled = true; btn.textContent = 'Verifying…';
+  try {
+    const res = await call('msa13ixVerifyCode', email, code);
+    _otpToken = res.token;
+    // Check if user has a password
+    const status = await call('msa13uiPasswordStatus', res.token);
+    if (status && status.hasPassword) {
+      // Has password — do a full session via the OTP token approach
+      await afterLogin(res.token);
+    } else {
+      // No password — offer enrollment
+      setAlert('login-alert', 'Email verified! Set a password to enable direct login.', 'info');
+      document.getElementById('otp-step2').style.display = 'none';
+      document.getElementById('otp-step3').style.display = '';
+    }
+  } catch (e) {
+    setAlert('login-alert', e.message);
+  } finally { btn.disabled = false; btn.textContent = 'Verify & Continue'; }
+}
+
+/* ─── LOGIN: SET PASSWORD ─────────────────────────────── */
+async function doSetPassword() {
+  const p1 = document.getElementById('otp-newpass').value;
+  const p2 = document.getElementById('otp-newpass2').value;
+  if (p1.length < 10) return setAlert('login-alert', 'Password must be at least 10 characters.');
+  if (p1 !== p2) return setAlert('login-alert', 'Passwords do not match.');
+  const btn = event.target; btn.disabled = true; btn.textContent = 'Setting password…';
+  try {
+    await call('msa13uiSetPassword', _otpToken, p1);
+    toast('Password set! Signing you in…', 'ok');
+    await afterLogin(_otpToken);
+  } catch (e) {
+    setAlert('login-alert', e.message);
+  } finally { btn.disabled = false; btn.textContent = 'Set Password & Sign In'; }
+}
+
+async function doSkipPassword() {
+  if (_otpToken) await afterLogin(_otpToken);
+}
+
+/* ─── AFTER LOGIN ─────────────────────────────────────── */
+async function afterLogin(token) {
+  SESSION.token = token;
+  try {
+    const cap = await call('msa13uiCapabilities', token);
+    SESSION.name  = cap.name  || '';
+    SESSION.role  = cap.role  || '';
+    SESSION.email = cap.email || document.getElementById('pw-email').value.trim() || document.getElementById('otp-email').value.trim();
+    SESSION.canAdmin = !!cap.canAdmin;
+    SESSION.canSign  = !!cap.canSign;
+  } catch {
+    // Try resume as fallback
+    try {
+      const r = await call('msa13uiResume', token);
+      if (r && r.user) {
+        SESSION.email = r.user.email;
+        SESSION.role  = r.user.role;
+        SESSION.name  = r.user.name;
+        SESSION.canAdmin = ['ADMIN','SUPER_ADMIN'].includes(r.user.role);
+      }
+    } catch {}
+  }
+  saveSession();
+  showApp();
+}
+
+/* ─── SESSION RESUME ──────────────────────────────────── */
+async function tryResume() {
+  loadSession();
+  if (!SESSION.token) return;
+  try {
+    const r = await call('msa13uiResume', SESSION.token);
+    if (r && r.user) {
+      SESSION.email = r.user.email;
+      SESSION.role  = r.user.role;
+      SESSION.name  = r.user.name;
+      showApp();
+      return;
+    }
+  } catch {}
+  clearSession();
+}
+
+/* ─── SHOW APP ────────────────────────────────────────── */
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = '';
+  document.getElementById('topbar-email').textContent = SESSION.name || SESSION.email || '';
+  const roleEl = document.getElementById('topbar-role');
+  roleEl.textContent = SESSION.role || '';
+  roleEl.style.display = SESSION.role ? '' : 'none';
+
+  // Show/hide admin items
+  document.querySelectorAll('.admin-only').forEach(el => {
+    el.style.display = SESSION.canAdmin ? '' : 'none';
+  });
+
+  loadDashboard();
+}
+
+function doLogout() {
+  if (SESSION.token) call('msa13uiLogout', SESSION.token).catch(() => {});
+  clearSession();
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = '';
+  // reset OTP flow
+  document.getElementById('otp-step1').style.display = '';
+  document.getElementById('otp-step2').style.display = 'none';
+  document.getElementById('otp-step3').style.display = 'none';
+  _otpToken = null;
+}
+
+/* ─── NAVIGATION ──────────────────────────────────────── */
+function switchTab(id) {
+  ['pw','otp'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t===id);
+    document.querySelectorAll('.tab-btn').forEach((b,i) => {
+      b.classList.toggle('active', (i===0&&id==='pw')||(i===1&&id==='otp'));
+    });
+  });
+  setAlert('login-alert', '');
+}
+
+function goPage(el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  const pg = el.getAttribute('data-page');
+  document.getElementById('page-'+pg).classList.add('active');
+  loadPage(pg);
+}
+
+function loadPage(pg) {
+  if (pg === 'dashboard') loadDashboard();
+  else if (pg === 'my-interviews') loadMyInterviews();
+  else if (pg === 'signing-queue') loadSigningQueue();
+  else if (pg === 'vacancies') loadVacancies();
+  else if (pg === 'applications') loadApplications();
+  else if (pg === 'interviews-admin') loadInterviewsAdmin();
+  else if (pg === 'appointments') loadAppointments();
+  else if (pg === 'users-admin') loadUsersAdmin();
+}
+
+/* ═════════════════════════════════════════════════════════
+   PAGE LOADERS
+═════════════════════════════════════════════════════════ */
+
+/* ─── DASHBOARD ───────────────────────────────────────── */
+async function loadDashboard() {
+  document.getElementById('dash-stats').innerHTML = '<p style="color:var(--text3)">Loading…</p>';
+  try {
+    const h = await call('msa13ixHome', SESSION.token);
+    const user = h.user || {};
+    const admin = h.admin || {};
+
+    document.getElementById('dash-sub').textContent = 'Welcome back, ' + (user.name || user.email || '') + ' · Term ' + (h.term || '');
+
+    // Stats
+    const stats = [];
+    if (Array.isArray(h.assignments)) stats.push(['My Panels', h.assignments.length]);
+    if (admin.candidateCount != null) stats.push(['Candidates', admin.candidateCount]);
+    if (admin.pendingDecisions != null) stats.push(['Pending Decisions', admin.pendingDecisions]);
+    if (admin.appointmentCount != null) stats.push(['Appointments', admin.appointmentCount]);
+
+    document.getElementById('dash-stats').innerHTML = stats.map(([label, val]) =>
+      `<div class="stat"><div class="stat-val">${val}</div><div class="stat-label">${label}</div></div>`
+    ).join('') || '';
+
+    // Assignments
+    const aList = document.getElementById('dash-assignments');
+    if (h.assignments && h.assignments.length) {
+      aList.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Candidate</th><th>Role</th><th>Status</th><th></th></tr></thead><tbody>' +
+        h.assignments.map(a => `<tr>
+          <td><b>${escHtml(a.name||a.candidateName||a.appId)}</b><br><span style="color:var(--text3);font-size:11px">${escHtml(a.position||a.positionId||'')}</span></td>
+          <td>${escHtml(a.role||'')}</td>
+          <td>${badge(a.status||'PENDING')}</td>
+          <td><button class="btn btn-sm btn-primary" onclick="openEvalModal('${escHtml(a.id||a.assignmentId||'')}')">Evaluate</button></td>
+        </tr>`).join('') +
+        '</tbody></table></div>';
+    } else {
+      aList.innerHTML = '<p style="color:var(--text3);font-size:13px">No interview assignments for this term.</p>';
+    }
+
+    if (admin.candidateCount != null) {
+      document.getElementById('dash-admin-info').innerHTML =
+        `<p style="font-size:13px">Use the <b>Interviews</b> or <b>Appointments</b> pages to manage the pipeline.</p>
+         <p style="font-size:12px;color:var(--text3);margin-top:8px">Term: ${escHtml(h.term||'')}</p>`;
+    }
+  } catch (e) {
+    document.getElementById('dash-stats').innerHTML = '';
+    document.getElementById('dash-assignments').innerHTML = `<div class="alert alert-err">${escHtml(e.message)}</div>`;
+  }
+}
+
+/* ─── MY INTERVIEWS ───────────────────────────────────── */
+async function loadMyInterviews() {
+  const box = document.getElementById('my-interviews-content');
+  box.innerHTML = '<p style="color:var(--text3)">Loading…</p>';
+  try {
+    const h = await call('msa13ixHome', SESSION.token);
+    if (!h.assignments || !h.assignments.length) {
+      box.innerHTML = '<div class="alert alert-info">No interview assignments for this term.</div>';
+      return;
+    }
+    box.innerHTML = h.assignments.map(a => `
+      <div class="card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div>
+            <div style="font-weight:600;font-size:15px">${escHtml(a.name||a.candidateName||a.appId)}</div>
+            <div style="color:var(--text3);font-size:12px;margin-top:2px">${escHtml(a.position||a.positionId||'')} · ${escHtml(a.lc||a.lcId||'')} · Role: ${escHtml(a.role||'')}</div>
+            ${a.due ? `<div style="font-size:12px;color:var(--text3)">Due: ${escHtml(a.due)}</div>` : ''}
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            ${badge(a.status||'PENDING')}
+            <button class="btn btn-primary btn-sm" onclick="openEvalModal('${escHtml(a.id||a.assignmentId||'')}')">
+              ${a.submitted ? 'View/Edit Evaluation' : 'Submit Evaluation'}
+            </button>
+          </div>
+        </div>
+      </div>`).join('');
+  } catch (e) {
+    box.innerHTML = `<div class="alert alert-err">${escHtml(e.message)}</div>`;
+  }
+}
+
+/* ─── EVALUATION MODAL ────────────────────────────────── */
+let _evalAssignmentId = null;
+async function openEvalModal(assignmentId) {
+  _evalAssignmentId = assignmentId;
+  document.getElementById('eval-criteria-list').innerHTML = '<p style="color:var(--text3)">Loading…</p>';
+  document.getElementById('eval-candidate-info').textContent = '';
+  setAlert('eval-alert', '');
+  openModal('modal-eval');
+  try {
+    const ev = await call('msa13ixGetEvaluation', SESSION.token, assignmentId);
+    document.getElementById('eval-candidate-info').innerHTML =
+      `<b>${escHtml(ev.name||ev.candidateName||assignmentId)}</b> — ${escHtml(ev.position||ev.positionId||'')}`;
+    if (ev.existing) {
+      document.getElementById('eval-recommendation').value = ev.existing.recommendation || 'RECOMMEND';
+      document.getElementById('eval-comments').value = ev.existing.comments || '';
+    }
+    const criteria = ev.criteria || [];
+    document.getElementById('eval-criteria-list').innerHTML = criteria.map((c, i) => `
+      <div class="criterion-item">
+        <div class="criterion-name">${escHtml(c.name)}</div>
+        <div class="criterion-meta">Weight: ${c.weight}% · Score range: ${c.min}–${c.max}</div>
+        <input type="range" id="crit-${i}" min="${c.min}" max="${c.max}"
+          value="${ev.existing && ev.existing.scores && ev.existing.scores[c.id] != null ? ev.existing.scores[c.id] : Math.round((c.min+c.max)/2)}"
+          step="1" oninput="document.getElementById('crit-disp-${i}').textContent=this.value">
+        <div class="score-display" id="crit-disp-${i}">${ev.existing && ev.existing.scores && ev.existing.scores[c.id] != null ? ev.existing.scores[c.id] : Math.round((c.min+c.max)/2)}</div>
+      </div>`).join('');
+    // Store criteria for submission
+    document.getElementById('eval-criteria-list').dataset.criteria = JSON.stringify(criteria);
+  } catch (e) {
+    document.getElementById('eval-criteria-list').innerHTML = `<div class="alert alert-err">${escHtml(e.message)}</div>`;
+  }
+}
+
+async function doSubmitEval() {
+  const criteriaRaw = document.getElementById('eval-criteria-list').dataset.criteria;
+  const criteria = criteriaRaw ? JSON.parse(criteriaRaw) : [];
+  const scores = {};
+  criteria.forEach((c, i) => {
+    scores[c.id] = Number(document.getElementById('crit-'+i).value);
+  });
+  const payload = {
+    assignmentId: _evalAssignmentId,
+    scores,
+    recommendation: document.getElementById('eval-recommendation').value,
+    comments: document.getElementById('eval-comments').value,
+  };
+  setAlert('eval-alert', '');
+  const btn = event.target; btn.disabled = true; btn.textContent = 'Submitting…';
+  try {
+    await call('msa13ixSubmitEvaluation', SESSION.token, payload);
+    toast('Evaluation submitted!', 'ok');
+    closeModal('modal-eval');
+    loadMyInterviews();
+  } catch (e) {
+    setAlert('eval-alert', e.message);
+  } finally { btn.disabled = false; btn.textContent = 'Submit Evaluation'; }
+}
+
+/* ─── SIGNING QUEUE ───────────────────────────────────── */
+async function loadSigningQueue() {
+  const box = document.getElementById('signing-queue-content');
+  box.innerHTML = '<p style="color:var(--text3)">Loading…</p>';
+  try {
+    const res = await call('msa13uiSignerQueue', SESSION.token);
+    const items = res.queue || res || [];
+    if (!items.length) {
+      box.innerHTML = '<div class="alert alert-info">No letters are currently awaiting your signature.</div>';
+      return;
+    }
+    box.innerHTML = items.map(a => `
+      <div class="sign-item">
+        <div class="sign-item-info">
+          <div style="font-weight:600">${escHtml(a.name||a.candidateName||a.id)}</div>
+          <div style="color:var(--text3);font-size:12px">${escHtml(a.position||a.positionId||'')} · Ref: ${escHtml(a.id||'')}</div>
+          <div style="margin-top:6px">${badge('LETTER_SIGNING')}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn btn-primary btn-sm" onclick="viewSignerDraft('${escHtml(a.id||'')}')">View Draft PDF</button>
+        </div>
+      </div>`).join('');
+  } catch (e) {
+    box.innerHTML = `<div class="alert alert-err">${escHtml(e.message)}</div>`;
+  }
+}
+
+async function viewSignerDraft(id) {
+  const btn = event.target; btn.disabled = true; btn.textContent = 'Loading PDF…';
+  try {
+    const res = await call('msa13uiSignerDraftPdf', SESSION.token, id);
+    if (res && res.base64) {
+      const bytes = atob(res.base64);
+      const arr = new Uint8Array(bytes.length);
+      for (let i=0; i<bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+      const blob = new Blob([arr], {type:'application/pdf'});
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    } else {
+      toast('PDF not available yet.', 'err');
+    }
+  } catch (e) {
+    toast(e.message, 'err');
+  } finally { btn.disabled = false; btn.textContent = 'View Draft PDF'; }
+}
+
+/* ─── VACANCIES ───────────────────────────────────────── */
+async function loadVacancies() {
+  const box = document.getElementById('vacancies-content');
+  box.innerHTML = '<p style="color:var(--text3)">Loading…</p>';
+  try {
+    // Use msa13ixAdminCandidates to get term info; vacancies may come from positions
+    const data = await call('msa13ixAdminCandidates', SESSION.token);
+    const positions = {};
+    (data.candidates || data || []).forEach(c => {
+      const p = c.positionId || c.position || 'Unknown';
+      if (!positions[p]) positions[p] = { name: c.position || p, count: 0, apps: [] };
+      positions[p].count++;
+      positions[p].apps.push(c);
+    });
+    const posKeys = Object.keys(positions);
+    if (!posKeys.length) {
+      box.innerHTML = '<div class="alert alert-info">No active applications or vacancies found for this term.</div>';
+      return;
+    }
+    box.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Position</th><th>Applicants</th><th>Eligible</th></tr></thead><tbody>' +
+      posKeys.map(k => {
+        const p = positions[k];
+        const eligible = p.apps.filter(a => a.eligible || a.verified).length;
+        return `<tr><td><b>${escHtml(p.name)}</b></td><td>${p.count}</td><td>${eligible}</td></tr>`;
+      }).join('') +
+      '</tbody></table></div>';
+  } catch (e) {
+    box.innerHTML = `<div class="alert alert-err">${escHtml(e.message)}</div>`;
+  }
+}
+
+/* ─── APPLICATIONS ────────────────────────────────────── */
+async function loadApplications() {
+  const box = document.getElementById('applications-content');
+  box.innerHTML = '<p style="color:var(--text3)">Loading…</p>';
+  try {
+    const data = await call('msa13ixAdminCandidates', SESSION.token);
+    const candidates = data.candidates || data || [];
+    if (!candidates.length) {
+      box.innerHTML = '<div class="alert alert-info">No applications for this term.</div>';
+      return;
+    }
+    box.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Applicant</th><th>LC</th><th>Position</th><th>Eligible</th><th>Actions</th></tr></thead><tbody>' +
+      candidates.map(c => `<tr>
+        <td><b>${escHtml(c.name||c.appId)}</b><br><span style="color:var(--text3);font-size:11px">${escHtml(c.email||'')}</span></td>
+        <td>${escHtml(c.lcId||c.lc||'')}</td>
+        <td>${escHtml(c.positionId||c.position||'')}</td>
+        <td>${badge(c.eligible||c.verified ? 'ELIGIBLE' : 'PENDING')}</td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-sm btn-secondary" onclick="showPanelRules('${escHtml(c.appId||c.id||'')}')">Panel Rules</button>
+        </td>
+      </tr>`).join('') +
+      '</tbody></table></div>';
+  } catch (e) {
+    box.innerHTML = `<div class="alert alert-err">${escHtml(e.message)}</div>`;
+  }
+}
+
+async function showPanelRules(appId) {
+  try {
+    const rules = await call('msa13ixAdminPanelRules', SESSION.token, appId);
+    const rList = Array.isArray(rules) ? rules : (rules.rules || []);
+    alert('Panel rules for ' + appId + ':\n' + (rList.map(r => `${r.role}: min ${r.min}${r.required?' (required)':''}`).join('\n') || 'None configured.'));
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+/* ─── INTERVIEWS ADMIN ────────────────────────────────── */
+let _interviewCandidates = [];
+let _selectedAppId = null;
+
+async function loadInterviewsAdmin() {
+  const box = document.getElementById('interviews-admin-content');
+  box.innerHTML = '<p style="color:var(--text3)">Loading…</p>';
+  try {
+    const data = await call('msa13ixAdminCandidates', SESSION.token);
+    _interviewCandidates = data.candidates || data || [];
+    renderInterviewsList();
+  } catch (e) {
+    box.innerHTML = `<div class="alert alert-err">${escHtml(e.message)}</div>`;
+  }
+}
+
+function renderInterviewsList() {
+  const box = document.getElementById('interviews-admin-content');
+  if (!_interviewCandidates.length) {
+    box.innerHTML = '<div class="alert alert-info">No candidates this term.</div>';
+    return;
+  }
+  box.innerHTML = `
+    <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start">
+      <div style="flex:0 0 300px;min-width:240px">
+        <div class="card" style="padding:14px">
+          <div class="card-title" style="margin-bottom:10px">Candidates</div>
+          ${_interviewCandidates.map(c => `
+            <div class="sign-item" style="cursor:pointer;border-radius:8px;padding:10px 12px;margin-bottom:6px;${_selectedAppId===c.appId?'border-color:var(--teal2);background:var(--teal-lt)':''}"
+              onclick="selectCandidate('${escHtml(c.appId||c.id||'')}')">
+              <div class="sign-item-info">
+                <div style="font-weight:600;font-size:13px">${escHtml(c.name||c.appId)}</div>
+                <div style="color:var(--text3);font-size:11px">${escHtml(c.positionId||'')} · ${escHtml(c.lcId||'')}</div>
+                ${badge(c.eligible ? 'ELIGIBLE' : 'PENDING')}
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div style="flex:1;min-width:280px" id="ix-detail-panel">
+        <div class="card">Select a candidate to manage their interview panel.</div>
+      </div>
+    </div>`;
+}
+
+async function selectCandidate(appId) {
+  _selectedAppId = appId;
+  renderInterviewsList();
+  const panel = document.getElementById('ix-detail-panel');
+  panel.innerHTML = '<div class="card"><p style="color:var(--text3)">Loading summary…</p></div>';
+  try {
+    const summary = await call('msa13ixAdminSummary', SESSION.token, appId);
+    const cand = _interviewCandidates.find(c => c.appId === appId) || {};
+    panel.innerHTML = `
+      <div class="card">
+        <div class="card-title">${escHtml(cand.name||appId)} — Interview Panel</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+          ${badge(summary.status||summary.overallStatus||'PENDING')}
+          ${summary.avgScore != null ? `<span style="font-size:12px;color:var(--text2)">Avg score: <b>${Number(summary.avgScore).toFixed(1)}%</b></span>` : ''}
+        </div>
+
+        ${summary.panel && summary.panel.length ? `
+          <div class="card-title" style="font-size:13px;margin-bottom:8px">Panel Members</div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Interviewer</th><th>Role</th><th>Status</th><th>Score</th></tr></thead>
+            <tbody>
+              ${summary.panel.map(p => `<tr>
+                <td>${escHtml(p.email||p.name||'')}</td>
+                <td>${escHtml(p.role||'')}</td>
+                <td>${badge(p.status||'PENDING')}</td>
+                <td>${p.score != null ? Number(p.score).toFixed(1)+'%' : '—'}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table></div>` : '<p style="color:var(--text3);font-size:13px;margin-bottom:14px">No panel members assigned yet.</p>'}
+
+        ${summary.gaps && summary.gaps.length ? `<div class="alert alert-warn">Gaps: ${escHtml(summary.gaps.join(', '))}</div>` : ''}
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">
+          <button class="btn btn-primary btn-sm" onclick="openAssignModal('${escHtml(appId)}')">Assign Interviewer</button>
+          <button class="btn btn-secondary btn-sm" onclick="openDecisionModal('${escHtml(appId)}')">Record Decision</button>
+        </div>
+
+        ${summary.decision ? `
+          <div class="alert alert-info" style="margin-top:14px">
+            <b>Decision:</b> ${escHtml(summary.decision)} · <span style="color:var(--text3)">${escHtml(summary.decisionNotes||'')}</span>
+          </div>` : ''}
+      </div>`;
+  } catch (e) {
+    panel.innerHTML = `<div class="card"><div class="alert alert-err">${escHtml(e.message)}</div></div>`;
+  }
+}
+
+function openAssignModal(appId) {
+  _selectedAppId = appId;
+  document.getElementById('assign-email').value = '';
+  document.getElementById('assign-due').value = '';
+  setAlert('assign-alert', '');
+  openModal('modal-assign');
+}
+
+async function doAssign() {
+  const email = document.getElementById('assign-email').value.trim();
+  const role = document.getElementById('assign-role').value;
+  const due = document.getElementById('assign-due').value.trim();
+  if (!email) return setAlert('assign-alert', 'Enter interviewer email.');
+  const btn = event.target; btn.disabled = true; btn.textContent = 'Assigning…';
+  try {
+    await call('msa13ixAdminAssign', SESSION.token, { appId: _selectedAppId, email, role, due: due || null });
+    toast('Interviewer assigned!', 'ok');
+    closeModal('modal-assign');
+    selectCandidate(_selectedAppId);
+  } catch (e) {
+    setAlert('assign-alert', e.message);
+  } finally { btn.disabled = false; btn.textContent = 'Assign'; }
+}
+
+function openDecisionModal(appId) {
+  _selectedAppId = appId;
+  document.getElementById('dec-notes').value = '';
+  setAlert('dec-alert', '');
+  openModal('modal-decision');
+}
+
+async function doFinalDecision() {
+  const decision = document.getElementById('dec-decision').value;
+  const notes = document.getElementById('dec-notes').value;
+  if (!decision) return setAlert('dec-alert', 'Choose a decision.');
+  if (!confirm(`Record decision: ${decision} for this candidate?`)) return;
+  const btn = event.target; btn.disabled = true; btn.textContent = 'Recording…';
+  try {
+    await call('msa13ixAdminFinalize', SESSION.token, _selectedAppId, decision, notes);
+    toast('Decision recorded!', 'ok');
+    closeModal('modal-decision');
+    selectCandidate(_selectedAppId);
+  } catch (e) {
+    setAlert('dec-alert', e.message);
+  } finally { btn.disabled = false; btn.textContent = 'Record Decision'; }
+}
+
+/* ─── APPOINTMENTS ────────────────────────────────────── */
+async function loadAppointments() {
+  const box = document.getElementById('appointments-content');
+  box.innerHTML = '<p style="color:var(--text3)">Loading…</p>';
+  try {
+    const data = await call('msa13apAdminList', SESSION.token);
+    const candidates = data.candidates || data || [];
+    if (!candidates.length) {
+      box.innerHTML = '<div class="alert alert-info">No SELECT decisions yet. Record a final decision in Interviews first.</div>';
+      return;
+    }
+    box.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Candidate</th><th>LC · Position</th><th>Appointment</th><th>Status</th><th>Actions</th></tr></thead><tbody>' +
+      candidates.map(c => `<tr>
+        <td><b>${escHtml(c.name||c.appId)}</b><br><span style="color:var(--text3);font-size:11px">${escHtml(c.email||'')}</span></td>
+        <td>${escHtml(c.lcId||'')} · ${escHtml(c.positionId||'')}</td>
+        <td style="font-size:12px;color:var(--text3)">${c.appointmentId ? escHtml(c.appointmentId) : '—'}</td>
+        <td>${badge(c.appointmentId ? (c.status||'PREPARING') : 'No appointment')}</td>
+        <td style="white-space:nowrap">
+          ${!c.appointmentId
+            ? `<button class="btn btn-sm btn-primary" onclick="createAppointment('${escHtml(c.appId||c.id||'')}',this)">Create</button>`
+            : `<button class="btn btn-sm btn-secondary" onclick="viewAppointment('${escHtml(c.appointmentId||'')}')">Details</button>`}
+        </td>
+      </tr>`).join('') +
+      '</tbody></table></div>';
+  } catch (e) {
+    box.innerHTML = `<div class="alert alert-err">${escHtml(e.message)}</div>`;
+  }
+}
+
+async function createAppointment(appId, btn) {
+  if (!confirm('Create a pending appointment for this candidate?')) return;
+  btn.disabled = true; btn.textContent = 'Creating…';
+  try {
+    const res = await call('msa13apCreate', SESSION.token, appId);
+    toast('Appointment created: ' + (res.id||''), 'ok');
+    loadAppointments();
+  } catch (e) {
+    toast(e.message, 'err');
+    btn.disabled = false; btn.textContent = 'Create';
+  }
+}
+
+async function viewAppointment(id) {
+  document.getElementById('modal-appt-body').innerHTML = '<p style="color:var(--text3)">Loading…</p>';
+  openModal('modal-appt');
+  try {
+    const d = await call('msa13apAdminDetails', SESSION.token, id);
+    const pipeStages = ['PREPARING','READY','ISSUED','UNDER_REVIEW','ACTIVE'];
+    const curIdx = pipeStages.indexOf(d.status);
+
+    document.getElementById('modal-appt-body').innerHTML = `
+      <div style="margin-bottom:14px">
+        <div style="font-weight:700;font-size:16px">${escHtml(d.name||d.candidateName||id)}</div>
+        <div style="color:var(--text3);font-size:12px">${escHtml(d.email||'')} · Ref: ${escHtml(d.id||id)}</div>
+        <div style="margin-top:8px">${badge(d.status||'PREPARING')}</div>
+      </div>
+
+      <div class="pipeline">
+        ${pipeStages.map((s,i) => `<div class="pip-stage ${i<curIdx?'done':i===curIdx?'active':''}">${s.replace(/_/g,' ')}</div>`).join('')}
+      </div>
+
+      ${d.acceptBy ? `<p style="font-size:12px;color:var(--text3);margin-bottom:14px">Acceptance deadline: ${escHtml(new Date(d.acceptBy).toLocaleString())}</p>` : ''}
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+        ${!d.draftId && d.status === 'PREPARING' ? `<button class="btn btn-primary btn-sm" onclick="generateDrafts('${escHtml(d.id||id)}',this)">Generate Document Drafts</button>` : ''}
+        ${d.draftId ? `<a href="https://docs.google.com/document/d/${encodeURIComponent(d.draftId)}/edit" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">Open Letter Draft</a>` : ''}
+        ${d.agreementId ? `<a href="https://drive.google.com/file/d/${encodeURIComponent(d.agreementId)}/view" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">Open Agreement PDF</a>` : ''}
+      </div>
+
+      ${d.submissions && d.submissions.length ? `
+        <div class="card-title" style="font-size:13px;margin-bottom:8px">Signed Agreement Submissions</div>
+        ${d.submissions.map(s => `
+          <div style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+              <div>
+                <b style="font-size:13px">Submission ${escHtml(s.id||'')}</b>
+                <div style="margin-top:4px">${badge(s.status||'UNDER_REVIEW')}</div>
+              </div>
+              ${s.fileId ? `<a href="https://drive.google.com/file/d/${encodeURIComponent(s.fileId)}/view" target="_blank" rel="noopener" class="btn btn-sm btn-secondary">View Signed PDF</a>` : ''}
+            </div>
+            ${s.status === 'UNDER_REVIEW' ? `
+              <div style="margin-top:12px">
+                <div class="form-group"><label>Review Notes</label><textarea id="rev-notes-${escHtml(s.id||'')}" placeholder="What you checked: name, dates, handwritten signature…"></textarea></div>
+                <div class="form-group"><label>Decision</label>
+                  <select id="rev-dec-${escHtml(s.id||'')}">
+                    <option value="APPROVE">Approve / Activate</option>
+                    <option value="CORRECTION_REQUIRED">Request Correction</option>
+                    <option value="REJECT">Reject</option>
+                  </select>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="reviewSubmission('${escHtml(s.id||'')}','${escHtml(d.id||id)}',this)">Save Review</button>
+              </div>` : ''}
+          </div>`).join('')}` : '<p style="font-size:13px;color:var(--text3)">No signed agreement submissions yet.</p>'}`;
+  } catch (e) {
+    document.getElementById('modal-appt-body').innerHTML = `<div class="alert alert-err">${escHtml(e.message)}</div>`;
+  }
+}
+
+async function generateDrafts(id, btn) {
+  btn.disabled = true; btn.textContent = 'Generating…';
+  try {
+    await call('msa13apGenerateDrafts', SESSION.token, id);
+    toast('Document drafts generated!', 'ok');
+    viewAppointment(id);
+  } catch (e) {
+    toast(e.message, 'err');
+  } finally { btn.disabled = false; btn.textContent = 'Generate Document Drafts'; }
+}
+
+async function reviewSubmission(submissionId, apptId, btn) {
+  const dec = document.getElementById('rev-dec-'+submissionId).value;
+  const notes = document.getElementById('rev-notes-'+submissionId).value;
+  if (!confirm('Record review decision: ' + dec + '?')) return;
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    await call('msa13apAdminReview', SESSION.token, submissionId, dec, notes);
+    toast('Review saved!', 'ok');
+    loadAppointments();
+    viewAppointment(apptId);
+  } catch (e) {
+    toast(e.message, 'err');
+  } finally { btn.disabled = false; btn.textContent = 'Save Review'; }
+}
+
+/* ─── USERS ADMIN ─────────────────────────────────────── */
+async function loadUsersAdmin() {
+  const box = document.getElementById('users-admin-content');
+  box.innerHTML = '<p style="color:var(--text3)">Loading…</p>';
+  try {
+    const data = await call('msa13ixAdminUsers', SESSION.token);
+    const users = data.users || data || [];
+    if (!users.length) {
+      box.innerHTML = '<div class="alert alert-info">No enabled user accounts found.</div>';
+      return;
+    }
+    box.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>LC</th></tr></thead><tbody>' +
+      users.map(u => `<tr>
+        <td><b>${escHtml(u.name||u.Name||'')}</b></td>
+        <td>${escHtml(u.email||u.Email||'')}</td>
+        <td>${badge(u.role||u.Role||'')}</td>
+        <td>${escHtml(u.lc||u['LC ID']||'')}</td>
+      </tr>`).join('') +
+      '</tbody></table></div>';
+  } catch (e) {
+    box.innerHTML = `<div class="alert alert-err">${escHtml(e.message)}</div>`;
+  }
+}
+
+/* ─── SETTINGS ────────────────────────────────────────── */
+async function doChangePassword() {
+  const old = document.getElementById('set-oldpass').value;
+  const p1  = document.getElementById('set-newpass').value;
+  const p2  = document.getElementById('set-newpass2').value;
+  if (!old || !p1) return setAlert('settings-alert', 'Fill all fields.');
+  if (p1.length < 10) return setAlert('settings-alert', 'New password must be at least 10 characters.');
+  if (p1 !== p2) return setAlert('settings-alert', 'New passwords do not match.');
+  const btn = event.target; btn.disabled = true; btn.textContent = 'Updating…';
+  try {
+    await call('msa13uiChangePassword', SESSION.token, old, p1);
+    setAlert('settings-alert', 'Password updated. You have been signed out of other sessions.', 'ok');
+    document.getElementById('set-oldpass').value = '';
+    document.getElementById('set-newpass').value = '';
+    document.getElementById('set-newpass2').value = '';
+    toast('Password changed!', 'ok');
+  } catch (e) {
+    setAlert('settings-alert', e.message);
+  } finally { btn.disabled = false; btn.textContent = 'Update Password'; }
+}
+
+/* ─── BOOT ────────────────────────────────────────────── */
+(async () => {
+  await tryResume();
+})();
+</script>
